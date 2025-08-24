@@ -1,6 +1,7 @@
 package co.irond.crediya.api;
 
 import co.irond.crediya.api.dto.UserRegistrationDto;
+import co.irond.crediya.model.user.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,7 +25,7 @@ public class RouterRest {
     @Bean
     @RouterOperations({
             @RouterOperation(
-                    path = "/api/v1/users",
+                    path = "/api/v1/usuarios",
                     produces = {MediaType.APPLICATION_JSON_VALUE},
                     method = RequestMethod.GET,
                     beanClass = Handler.class,
@@ -36,33 +37,33 @@ public class RouterRest {
                                             responseCode = "200",
                                             description = "get all users successfully.",
                                             content = @Content(
-                                                    schema = @Schema(implementation = UserRegistrationDto.class)
+                                                    schema = @Schema(implementation = User.class)
                                             )
                                     )
                             }
                     )
             ),
             @RouterOperation(
-                    path = "/api/v1/users",
+                    path = "/api/v1/usuarios",
                     produces = {MediaType.APPLICATION_JSON_VALUE},
                     method = RequestMethod.POST,
                     beanClass = Handler.class,
                     beanMethod = "listenSaveUser",
                     operation = @Operation(
-                            operationId = "addUser",
+                            operationId = "createUser",
                             responses = {
                                     @ApiResponse(
-                                            responseCode = "200",
+                                            responseCode = "201",
                                             description = "successful operation",
                                             content = @Content(
-                                                    schema = @Schema(implementation = String.class)
+                                                    schema = @Schema(implementation = co.irond.crediya.api.dto.ApiResponse.class)
                                             )
                                     ),
                                     @ApiResponse(
                                             responseCode = "400",
                                             description = "Fields empty or null",
                                             content = @Content(
-                                                    schema = @Schema(implementation = String.class)
+                                                    schema = @Schema(implementation = co.irond.crediya.api.dto.ApiResponse.class)
                                             )
                                     ),
                             },
@@ -75,7 +76,7 @@ public class RouterRest {
             )
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
-        return route(GET("/api/v1/users"), handler::listenGETUseCase)
-                .andRoute(POST("/api/v1/users"), handler::listenSaveUser);
+        return route(GET("/api/v1/usuarios"), handler::listenGETUseCase)
+                .andRoute(POST("/api/v1/usuarios"), handler::listenSaveUser);
     }
 }

@@ -6,7 +6,6 @@ import co.irond.crediya.api.utils.UserMapper;
 import co.irond.crediya.api.utils.ValidationService;
 import co.irond.crediya.model.user.User;
 import co.irond.crediya.usecase.user.UserUseCaseInterface;
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -26,7 +25,7 @@ public class Handler {
     private final ValidationService validationService;
     private final UserMapper userMapper;
 
-    public Mono<ServerResponse> listenGETUseCase() {
+    public Mono<ServerResponse> listenGETUseCase(ServerRequest request) {
         return ServerResponse.ok().contentType(MediaType.TEXT_EVENT_STREAM).body(userUseCase.getAllUsers(), User.class);
     }
 
@@ -42,11 +41,7 @@ public class Handler {
                             .path(serverRequest.path())
                             .data(savedUser).build();
                     return ServerResponse.created(URI.create("User")).contentType(MediaType.APPLICATION_JSON).bodyValue(response);
-                })
-                .onErrorResume(ValidationException.class, ex ->
-                        ServerResponse.badRequest()
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .bodyValue("{\"error\": \"" + ex.getMessage() + "\"}"));
+                });
     }
 
 }

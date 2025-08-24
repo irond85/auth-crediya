@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.info.Info;
 
 @Configuration
 @OpenAPIDefinition(info = @Info(
-        title = "Springweb flux functional endpoint .",
+        title = "Authentication service for CrediYa .",
         version = "1.0",
         description = "swagger documentation using open api."
 ))
