@@ -21,14 +21,14 @@ public class UserEntity {
     private Long id;
     @Column(nullable = false)
     private String name;
-    @Column(nullable = false)
+    @Column(nullable = false, name = "last_name")
     private String lastName;
     private LocalDateTime birthday;
     private String address;
     private String phone;
     @Column(unique = true, nullable = false)
     private String email;
-    @Column(nullable = false)
+    @Column(nullable = false, name = "base_salary")
     private BigDecimal baseSalary;
 
 }

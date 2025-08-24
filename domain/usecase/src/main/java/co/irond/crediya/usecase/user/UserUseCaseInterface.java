@@ -9,4 +9,6 @@ public interface UserUseCaseInterface {
     Mono<User> saveUser(User user);
 
     Flux<User> getAllUsers();
+
+    Mono<Boolean> existsByEmail(String email);
 }

@@ -25,12 +25,16 @@ public class UserReactiveRepositoryAdapter extends ReactiveAdapterOperations<
 
     @Override
     public Mono<User> save(User entity) {
-
         return super.save(entity);
     }
 
     @Override
     public Flux<User> findAll() {
         return super.findAll();
+    }
+
+    @Override
+    public Mono<Boolean> existsByEmail(String email) {
+        return repository.existsByEmail(email);
     }
 }

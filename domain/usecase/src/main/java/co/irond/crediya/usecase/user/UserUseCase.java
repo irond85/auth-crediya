@@ -17,12 +17,24 @@ public class UserUseCase implements UserUseCaseInterface {
             throw new IllegalArgumentException("Error incorrect info");
         }
 
-        return userRepository.save(user);
+        return existsByEmail(user.getEmail())
+                .flatMap(exists -> {
+                    if (Boolean.TRUE.equals(exists)) {
+                        return Mono.error(new IllegalArgumentException("Email already exists"));
+                    }
+                    return userRepository.save(user);
+                });
     }
 
     @Override
     public Flux<User> getAllUsers() {
         return userRepository.findAll();
     }
+
+    @Override
+    public Mono<Boolean> existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
 
 }
