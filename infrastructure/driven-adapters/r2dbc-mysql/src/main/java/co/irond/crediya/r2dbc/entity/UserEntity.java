@@ -1,7 +1,8 @@
 package co.irond.crediya.r2dbc.entity;
 
-import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
@@ -16,19 +17,16 @@ import java.time.LocalDateTime;
 public class UserEntity {
 
     @Id
-    @Column(name = "user_id")
-    @GeneratedValue
+    @Column("user_id")
     private Long id;
-    @Column(nullable = false)
     private String name;
-    @Column(nullable = false, name = "last_name")
+    @Column("last_name")
     private String lastName;
     private LocalDateTime birthday;
     private String address;
     private String phone;
-    @Column(unique = true, nullable = false)
     private String email;
-    @Column(nullable = false, name = "base_salary")
+    @Column("base_salary")
     private BigDecimal baseSalary;
 
 }
