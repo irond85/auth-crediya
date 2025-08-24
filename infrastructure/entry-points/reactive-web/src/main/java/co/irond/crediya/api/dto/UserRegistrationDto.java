@@ -10,7 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @Builder
@@ -22,7 +22,7 @@ public class UserRegistrationDto {
     private String name;
     @NotEmpty(message = "LastName can't be empty")
     private String lastName;
-    private LocalDateTime birthday;
+    private Date birthday;
     private String address;
     private String phone;
     @NotEmpty(message = "Email can't be empty")
