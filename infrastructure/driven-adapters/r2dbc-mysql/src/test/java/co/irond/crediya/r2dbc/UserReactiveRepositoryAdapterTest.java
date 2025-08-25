@@ -32,7 +32,6 @@ class UserReactiveRepositoryAdapterTest {
 
     private User user;
     private UserEntity userEntity;
-    private Long id = 1L;
 
     @BeforeEach
     void initMocks() {
@@ -57,6 +56,7 @@ class UserReactiveRepositoryAdapterTest {
         when(repository.findById(anyLong())).thenReturn(Mono.just(userEntity));
         when(mapper.map(userEntity, User.class)).thenReturn(user);
 
+        Long id = 1L;
         Mono<User> result = repositoryAdapter.findById(id);
 
         StepVerifier.create(result)
