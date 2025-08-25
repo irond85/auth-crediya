@@ -1,6 +1,6 @@
 package co.irond.crediya.api.exception;
 
-import co.irond.crediya.api.dto.ApiResponse;
+import co.irond.crediya.api.dto.ApiResponseDto;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
@@ -34,7 +34,7 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
         Map<String, Object> errorProperties = getErrorAttributes(request, ErrorAttributeOptions.defaults());
         int status = (int) errorProperties.getOrDefault("status", 500);
 
-        ApiResponse<Object> apiResponse = ApiResponse.builder().status(status)
+        ApiResponseDto<Object> apiResponse = ApiResponseDto.builder().status(status)
                 .message((String) errorProperties.get("error"))
                 .errors(Arrays.stream(((String) errorProperties.get("message"))
                         .split(", ")).toList())

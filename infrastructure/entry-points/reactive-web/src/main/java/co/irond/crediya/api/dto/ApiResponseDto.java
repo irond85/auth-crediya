@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-public class ApiResponse<T> {
+public class ApiResponseDto<T> {
 
     private Integer status;
     private String message;
