@@ -6,37 +6,28 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
+
 @RequiredArgsConstructor
-public class UserUseCase implements UserUseCaseInterface {
+public class UserUseCase {
 
     private final UserRepository userRepository;
+    private static final BigDecimal salaryMax = new BigDecimal(15000000);
 
-    @Override
     public Mono<User> saveUser(User user) {
-        if (!ValidatorUtil.validateNullOrEmpty(user.getName())
-                || !ValidatorUtil.validateNullOrEmpty(user.getLastName())
-                || !ValidatorUtil.validateEmail(user.getEmail())
-                || !ValidatorUtil.validateMoney(user.getBaseSalary())) {
-            throw new IllegalArgumentException("Incorrect info from request");
+        if (user.getBaseSalary().compareTo(BigDecimal.ZERO) < 0 || user.getBaseSalary().compareTo(salaryMax) > 0) {
+            throw new IllegalArgumentException("The Base Salary not within range");
         }
 
-        return existsByEmail(user.getEmail())
-                .flatMap(exists -> {
-                    if (Boolean.TRUE.equals(exists)) {
-                        return Mono.error(new IllegalArgumentException("Email already exists"));
-                    }
-                    return userRepository.save(user);
-                });
+
+        return userRepository.existsByEmail(user.getEmail())
+                .filter(exists -> !exists)
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Email already exists")))
+                .then(userRepository.saveUser(user));
     }
 
-    @Override
     public Flux<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    @Override
-    public Mono<Boolean> existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
+        return userRepository.findAllUsers();
     }
 
 }
