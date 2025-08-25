@@ -13,8 +13,11 @@ public class UserUseCase implements UserUseCaseInterface {
 
     @Override
     public Mono<User> saveUser(User user) {
-        if (!ValidatorUtil.validateNullOrEmpty(user.getName()) || !ValidatorUtil.validateNullOrEmpty(user.getLastName()) || !ValidatorUtil.validateEmail(user.getEmail()) || !ValidatorUtil.validateMoney(user.getBaseSalary())) {
-            throw new IllegalArgumentException("Error incorrect info");
+        if (!ValidatorUtil.validateNullOrEmpty(user.getName())
+                || !ValidatorUtil.validateNullOrEmpty(user.getLastName())
+                || !ValidatorUtil.validateEmail(user.getEmail())
+                || !ValidatorUtil.validateMoney(user.getBaseSalary())) {
+            throw new IllegalArgumentException("Incorrect info from request");
         }
 
         return existsByEmail(user.getEmail())
@@ -35,6 +38,5 @@ public class UserUseCase implements UserUseCaseInterface {
     public Mono<Boolean> existsByEmail(String email) {
         return userRepository.existsByEmail(email);
     }
-
 
 }
