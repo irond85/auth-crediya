@@ -1,7 +1,7 @@
 package co.irond.crediya.r2dbc.service;
 
 import co.irond.crediya.model.user.User;
-import co.irond.crediya.usecase.user.UserUseCaseInterface;
+import co.irond.crediya.usecase.user.UserUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class UserService {
 
-    private final UserUseCaseInterface userUseCase;
+    private final UserUseCase userUseCase;
     private final TransactionalOperator transactionalOperator;
 
     public Mono<User> saveUser(User user) {
