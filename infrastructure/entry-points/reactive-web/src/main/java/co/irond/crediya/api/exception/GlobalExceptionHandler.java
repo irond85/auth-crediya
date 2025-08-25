@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.*;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
 import java.util.Map;
 
 @Component
@@ -34,8 +35,9 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
         int status = (int) errorProperties.getOrDefault("status", 500);
 
         ApiResponse<Object> apiResponse = ApiResponse.builder().status(status)
-                .message((String) errorProperties.get("message"))
-                .path((String) errorProperties.get("path"))
+                .message((String) errorProperties.get("error"))
+                .errors(Arrays.stream(((String) errorProperties.get("message"))
+                        .split(", ")).toList())
                 .build();
 
         return ServerResponse.status(status).contentType(MediaType.APPLICATION_JSON)
