@@ -21,11 +21,13 @@ public class UserUseCase {
             throw new CrediYaException(ErrorCode.INVALID_BASE_SALARY);
         }
 
-
         return userRepository.existsByEmail(user.getEmail())
-                .filter(exists -> !exists)
-                .switchIfEmpty(Mono.error(new CrediYaException(ErrorCode.EMAIL_ALREADY_EXISTS)))
-                .then(userRepository.saveUser(user));
+                .flatMap(exists -> {
+                    if (Boolean.TRUE.equals(exists)) {
+                        return Mono.error(new CrediYaException(ErrorCode.EMAIL_ALREADY_EXISTS));
+                    }
+                    return userRepository.saveUser(user);
+                });
     }
 
     public Flux<User> getAllUsers() {
