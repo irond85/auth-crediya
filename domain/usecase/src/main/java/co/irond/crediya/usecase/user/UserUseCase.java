@@ -1,6 +1,8 @@
 package co.irond.crediya.usecase.user;
 
 import co.irond.crediya.model.user.User;
+import co.irond.crediya.model.user.exceptions.CrediYaException;
+import co.irond.crediya.model.user.exceptions.ErrorCode;
 import co.irond.crediya.model.user.gateways.UserRepository;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
@@ -16,13 +18,13 @@ public class UserUseCase {
 
     public Mono<User> saveUser(User user) {
         if (user.getBaseSalary().compareTo(BigDecimal.ZERO) < 0 || user.getBaseSalary().compareTo(salaryMax) > 0) {
-            throw new IllegalArgumentException("The Base Salary not within range");
+            throw new CrediYaException(ErrorCode.INVALID_BASE_SALARY);
         }
 
 
         return userRepository.existsByEmail(user.getEmail())
                 .filter(exists -> !exists)
-                .switchIfEmpty(Mono.error(new IllegalArgumentException("Email already exists")))
+                .switchIfEmpty(Mono.error(new CrediYaException(ErrorCode.EMAIL_ALREADY_EXISTS)))
                 .then(userRepository.saveUser(user));
     }
 
