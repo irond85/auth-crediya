@@ -21,10 +21,20 @@ public class UserUseCase {
             throw new CrediYaException(ErrorCode.INVALID_BASE_SALARY);
         }
 
-        return userRepository.existsByEmail(user.getEmail())
-                .flatMap(exists -> {
-                    if (Boolean.TRUE.equals(exists)) {
+        Mono<Boolean> emailExists = userRepository.existsByEmail(user.getEmail());
+        Mono<Boolean> dniExists = userRepository.findEmailByDni(user.getDni())
+                .hasElement();
+
+        return Mono.zip(emailExists, dniExists)
+                .flatMap(result -> {
+                    boolean emailAlreadyExists = result.getT1();
+                    boolean dniAlreadyExists = result.getT2();
+
+                    if (emailAlreadyExists) {
                         return Mono.error(new CrediYaException(ErrorCode.EMAIL_ALREADY_EXISTS));
+                    }
+                    if (dniAlreadyExists) {
+                        return Mono.error(new CrediYaException(ErrorCode.DNI_ALREADY_EXISTS));
                     }
                     return userRepository.saveUser(user);
                 });
