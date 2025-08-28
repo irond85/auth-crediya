@@ -33,6 +33,7 @@ class UserUseCaseTest {
     UserRepository userRepository;
 
     private User user;
+    private final String email = "myEmail@mail.com";
 
     @BeforeEach
     void initMocks() {
@@ -40,15 +41,17 @@ class UserUseCaseTest {
         user.setName("Sergio");
         user.setLastName("Agudelo");
         user.setBirthday(LocalDateTime.of(2025, 8, 25, 20, 0));
-        user.setEmail("myEmail@mail.com");
+        user.setEmail(email);
         user.setAddress("My Address 123");
         user.setBaseSalary(BigDecimal.TEN);
+        user.setDni("1234");
     }
 
     @Test
     void saveUser() {
         when(userRepository.saveUser(any(User.class))).thenReturn(Mono.just(user));
         when(userRepository.existsByEmail(anyString())).thenReturn(Mono.just(false));
+        when(userRepository.findEmailByDni(anyString())).thenReturn(Mono.empty());
 
         Mono<User> response = userUseCase.saveUser(user);
 
@@ -58,15 +61,15 @@ class UserUseCaseTest {
 
         verify(userRepository, times(1)).saveUser(any(User.class));
         verify(userRepository, times(1)).existsByEmail(anyString());
+        verify(userRepository, times(1)).findEmailByDni(anyString());
     }
 
     @Test
     void whenUserAlreadyExist_shouldReturnException() {
         when(userRepository.existsByEmail(anyString())).thenReturn(Mono.just(true));
+        when(userRepository.findEmailByDni(anyString())).thenReturn(Mono.just(email));
 
-        Executable executable = () -> {
-            userUseCase.saveUser(user).block();
-        };
+        Executable executable = () -> userUseCase.saveUser(user).block();
 
         CrediYaException exception = assertThrows(CrediYaException.class, executable);
         assertEquals("Already exists a user with this email.", exception.getMessage());
@@ -79,9 +82,7 @@ class UserUseCaseTest {
     void whenBaseSalaryIsLessThanZero_shouldReturnException() {
         user.setBaseSalary(new BigDecimal("-500"));
 
-        assertThrows(CrediYaException.class, () -> {
-            userUseCase.saveUser(user);
-        });
+        assertThrows(CrediYaException.class, () -> userUseCase.saveUser(user));
 
         verify(userRepository, never()).saveUser(any(User.class));
         verify(userRepository, never()).existsByEmail(anyString());
@@ -91,9 +92,7 @@ class UserUseCaseTest {
     void whenBaseSalaryIsGreaterThanZero_shouldReturnException() {
         user.setBaseSalary(new BigDecimal("15000001"));
 
-        assertThrows(CrediYaException.class, () -> {
-            userUseCase.saveUser(user);
-        });
+        assertThrows(CrediYaException.class, () -> userUseCase.saveUser(user));
 
         verify(userRepository, never()).saveUser(any(User.class));
         verify(userRepository, never()).existsByEmail(anyString());
@@ -110,5 +109,18 @@ class UserUseCaseTest {
                 .verifyComplete();
 
         verify(userRepository, times(1)).findAllUsers();
+    }
+
+    @Test
+    void getUserEmailById() {
+        when(userRepository.findEmailByDni(anyString())).thenReturn(Mono.just(email));
+
+        Mono<String> response = userUseCase.getUserEmailById(email);
+
+        StepVerifier.create(response)
+                .expectNextMatches(value -> value.equals(email))
+                .verifyComplete();
+
+        verify(userRepository, times(1)).findEmailByDni(anyString());
     }
 }
