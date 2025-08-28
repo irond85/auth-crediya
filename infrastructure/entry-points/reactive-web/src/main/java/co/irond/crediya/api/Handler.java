@@ -97,6 +97,13 @@ public class Handler {
                             content = @Content(
                                     schema = @Schema(implementation = ApiResponseDto.class)
                             )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "User with dni doesn't exists.",
+                            content = @Content(
+                                    schema = @Schema(implementation = ApiResponseDto.class)
+                            )
                     )
             },
             parameters = {
@@ -105,7 +112,7 @@ public class Handler {
                             name = "dni",
                             required = true,
                             description = "The unique DNI of the user.",
-                            example = "123456789"
+                            example = "1"
                     )
             }
     )
