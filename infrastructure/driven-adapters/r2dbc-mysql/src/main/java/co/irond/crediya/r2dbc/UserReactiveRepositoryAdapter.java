@@ -37,4 +37,9 @@ public class UserReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     public Mono<Boolean> existsByEmail(String email) {
         return repository.existsByEmail(email);
     }
+
+    @Override
+    public Mono<String> findEmailByDni(String dni) {
+        return repository.findEmailByDni(dni);
+    }
 }
