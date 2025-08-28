@@ -30,4 +30,8 @@ public class UserService {
         return userUseCase.getAllUsers();
     }
 
+    public Mono<String> getUserEmailByDni(String dni) {
+        return userUseCase.getUserEmailById(dni);
+    }
+
 }

@@ -27,5 +27,7 @@ public class UserRegistrationDto {
     private String email;
     @NotNull(message = "baseSalary can't be null")
     private BigDecimal baseSalary;
+    @NotEmpty(message = "dni can't be empty")
+    private String dni;
 
 }

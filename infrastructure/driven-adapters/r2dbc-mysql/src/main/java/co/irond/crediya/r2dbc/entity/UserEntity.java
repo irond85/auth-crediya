@@ -28,5 +28,6 @@ public class UserEntity {
     private String email;
     @Column("base_salary")
     private BigDecimal baseSalary;
+    private String dni;
 
 }

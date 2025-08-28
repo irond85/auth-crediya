@@ -5,8 +5,12 @@ import co.irond.crediya.api.dto.UserRegistrationDto;
 import co.irond.crediya.api.utils.UserMapper;
 import co.irond.crediya.api.utils.ValidationService;
 import co.irond.crediya.model.user.User;
+import co.irond.crediya.model.user.exceptions.CrediYaException;
+import co.irond.crediya.model.user.exceptions.ErrorCode;
 import co.irond.crediya.r2dbc.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -18,6 +22,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
+
+import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
 @Component
 @RequiredArgsConstructor
@@ -41,7 +47,7 @@ public class Handler {
             }
     )
     public Mono<ServerResponse> listenGETUseCase(ServerRequest request) {
-        return ServerResponse.ok().contentType(MediaType.TEXT_EVENT_STREAM).body(userService.getAllUsers(), User.class);
+        return ok().contentType(MediaType.TEXT_EVENT_STREAM).body(userService.getAllUsers(), User.class);
     }
 
     @Operation(
@@ -79,6 +85,47 @@ public class Handler {
                             .message("User created successfull")
                             .data(savedUser).build();
                     return ServerResponse.status(201).contentType(MediaType.APPLICATION_JSON).bodyValue(response);
+                });
+    }
+
+    @Operation(
+            operationId = "getUserEmailByDni",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "get user email from user dni successfully.",
+                            content = @Content(
+                                    schema = @Schema(implementation = ApiResponseDto.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "User with dni doesn't exists.",
+                            content = @Content(
+                                    schema = @Schema(implementation = ApiResponseDto.class)
+                            )
+                    )
+            },
+            parameters = {
+                    @Parameter(
+                            in = ParameterIn.PATH,
+                            name = "dni",
+                            required = true,
+                            description = "The unique DNI of the user.",
+                            example = "1"
+                    )
+            }
+    )
+    public Mono<ServerResponse> listenGetUserEmailByDni(ServerRequest request) {
+        String dniUser = request.pathVariable("dni");
+        return userService.getUserEmailByDni(dniUser)
+                .switchIfEmpty(Mono.error(new CrediYaException(ErrorCode.USER_NOT_FOUND)))
+                .flatMap(userEmail -> {
+                    ApiResponseDto<Object> response = ApiResponseDto.builder()
+                            .status(200)
+                            .message("User exists")
+                            .data(userEmail).build();
+                    return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(response);
                 });
     }
 
