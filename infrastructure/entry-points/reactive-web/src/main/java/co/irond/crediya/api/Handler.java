@@ -9,6 +9,8 @@ import co.irond.crediya.model.user.exceptions.CrediYaException;
 import co.irond.crediya.model.user.exceptions.ErrorCode;
 import co.irond.crediya.r2dbc.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -96,13 +98,28 @@ public class Handler {
                                     schema = @Schema(implementation = ApiResponseDto.class)
                             )
                     )
+            },
+            parameters = {
+                    @Parameter(
+                            in = ParameterIn.PATH,
+                            name = "dni",
+                            required = true,
+                            description = "The unique DNI of the user.",
+                            example = "123456789"
+                    )
             }
     )
     public Mono<ServerResponse> listenGetUserEmailByDni(ServerRequest request) {
         String dniUser = request.pathVariable("dni");
         return userService.getUserEmailByDni(dniUser)
                 .switchIfEmpty(Mono.error(new CrediYaException(ErrorCode.USER_NOT_FOUND)))
-                .flatMap(userEmail -> ok().bodyValue(userEmail));
+                .flatMap(userEmail -> {
+                    ApiResponseDto<Object> response = ApiResponseDto.builder()
+                            .status(200)
+                            .message("User exists")
+                            .data(userEmail).build();
+                    return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(response);
+                });
     }
 
 }

@@ -24,6 +24,6 @@ public class RouterRest {
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(GET("/api/v1/usuarios"), handler::listenGETUseCase)
                 .andRoute(POST("/api/v1/usuarios"), handler::listenSaveUser)
-                .andRoute(GET("/api/v1/usuarios/{dni}"), handler::listenGetUserEmailByDni);
+                .andRoute(GET("/api/v1/usuarios/dni/{dni}"), handler::listenGetUserEmailByDni);
     }
 }
