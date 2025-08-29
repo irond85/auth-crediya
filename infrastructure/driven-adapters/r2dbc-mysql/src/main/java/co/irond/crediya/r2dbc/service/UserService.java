@@ -1,5 +1,6 @@
 package co.irond.crediya.r2dbc.service;
 
+import co.irond.crediya.constants.OperationsMessage;
 import co.irond.crediya.model.user.User;
 import co.irond.crediya.usecase.user.UserUseCase;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +22,9 @@ public class UserService {
         return transactionalOperator.execute(transaction ->
                         userUseCase.saveUser(user)
                 )
-                .doOnNext(savedUser -> log.info("User {} saved successfully.", savedUser.getName()))
-                .doOnError(throwable -> log.error("Error failed service transactional: SaveUser. {}", throwable.getMessage()))
+                .doOnNext(savedUser -> log.info(OperationsMessage.SAVE_OK.getMessage(), savedUser.getEmail()))
+                .doOnError(throwable -> log.error(OperationsMessage.OPERATION_ERROR.getMessage(), "SaveUser. "
+                        + throwable.getMessage()))
                 .single();
     }
 
