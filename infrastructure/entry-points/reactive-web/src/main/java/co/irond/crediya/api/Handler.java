@@ -1,14 +1,18 @@
 package co.irond.crediya.api;
 
 import co.irond.crediya.api.dto.ApiResponseDto;
+import co.irond.crediya.api.dto.LoginRequestDto;
 import co.irond.crediya.api.dto.UserRegistrationDto;
 import co.irond.crediya.api.utils.UserMapper;
 import co.irond.crediya.api.utils.ValidationService;
 import co.irond.crediya.constants.OperationsMessage;
+import co.irond.crediya.model.dto.LoginDto;
+import co.irond.crediya.model.dto.TokenDto;
+import co.irond.crediya.model.exceptions.CrediYaException;
+import co.irond.crediya.model.exceptions.ErrorCode;
 import co.irond.crediya.model.user.User;
-import co.irond.crediya.model.user.exceptions.CrediYaException;
-import co.irond.crediya.model.user.exceptions.ErrorCode;
 import co.irond.crediya.r2dbc.service.UserService;
+import co.irond.crediya.usecase.login.LoginUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -19,6 +23,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -34,6 +39,7 @@ public class Handler {
     private final UserService userService;
     private final ValidationService validationService;
     private final UserMapper userMapper;
+    private final LoginUseCase loginUseCase;
 
     @Operation(
             operationId = "getAllUsers",
@@ -47,6 +53,7 @@ public class Handler {
                     )
             }
     )
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('ADVISOR')")
     public Mono<ServerResponse> listenGETUseCase(ServerRequest request) {
         return ok().contentType(MediaType.TEXT_EVENT_STREAM).body(userService.getAllUsers(), User.class);
     }
@@ -75,6 +82,7 @@ public class Handler {
                     )
             )
     )
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('ADVISOR')")
     public Mono<ServerResponse> listenSaveUser(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(UserRegistrationDto.class)
                 .doOnNext(userRegistrationDto -> log.info(OperationsMessage.REQUEST_RECEIVED.getMessage(), userRegistrationDto.toString()))
@@ -118,6 +126,7 @@ public class Handler {
                     )
             }
     )
+    @PreAuthorize("hasAuthority('CUSTOMER')")
     public Mono<ServerResponse> listenGetUserEmailByDni(ServerRequest request) {
         String dniUser = request.pathVariable("dni");
         return userService.getUserEmailByDni(dniUser)
@@ -130,6 +139,15 @@ public class Handler {
                             .data(userEmail).build();
                     return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(response);
                 });
+    }
+
+    public Mono<ServerResponse> listenLoginUser(ServerRequest request) {
+        return request.bodyToMono(LoginRequestDto.class)
+                .doOnNext(loginDto -> log.info(OperationsMessage.REQUEST_RECEIVED.getMessage(), loginDto.toString()))
+                .flatMap(validationService::validateObject)
+                .flatMap(dto -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(loginUseCase.login(new LoginDto(dto.getEmail(), dto.getPassword())), TokenDto.class));
     }
 
 }

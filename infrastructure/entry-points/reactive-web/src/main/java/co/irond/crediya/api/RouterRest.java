@@ -27,8 +27,9 @@ public class RouterRest {
 
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
-        return route(GET(authPath.getUsuarios()), handler::listenGETUseCase)
-                .andRoute(POST(authPath.getUsuarios()), handler::listenSaveUser)
-                .andRoute(GET(authPath.getUsuarioByDni()), handler::listenGetUserEmailByDni);
+        return route(GET(authPath.getV1() + authPath.getUsuarios()), handler::listenGETUseCase)
+                .andRoute(POST(authPath.getV1() + authPath.getUsuarios()), handler::listenSaveUser)
+                .andRoute(GET(authPath.getV1() + authPath.getUsuarioByDni()), handler::listenGetUserEmailByDni)
+                .andRoute(POST(authPath.getV1() + authPath.getLogin()), handler::listenLoginUser);
     }
 }
