@@ -24,7 +24,7 @@ public class JwtAuthManager implements ReactiveAuthenticationManager {
     public Mono<Authentication> authenticate(Authentication authentication) {
         return Mono.just(authentication)
                 .map(auth -> jwtProvider.getClaims(auth.getCredentials().toString()))
-                .onErrorResume(e -> Mono.error(new CrediYaException(ErrorCode.BAD_TOKEN)))
+                .onErrorResume(e -> Mono.error(new CrediYaException(ErrorCode.NO_TOKEN)))
                 .map(claims -> new UsernamePasswordAuthenticationToken(
                         claims.getSubject(),
                         null,
