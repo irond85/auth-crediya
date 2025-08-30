@@ -4,6 +4,7 @@ import co.irond.crediya.api.dto.ApiResponseDto;
 import co.irond.crediya.api.dto.UserRegistrationDto;
 import co.irond.crediya.api.utils.UserMapper;
 import co.irond.crediya.api.utils.ValidationService;
+import co.irond.crediya.constants.OperationsMessage;
 import co.irond.crediya.model.user.User;
 import co.irond.crediya.model.user.exceptions.CrediYaException;
 import co.irond.crediya.model.user.exceptions.ErrorCode;
@@ -76,13 +77,14 @@ public class Handler {
     )
     public Mono<ServerResponse> listenSaveUser(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(UserRegistrationDto.class)
+                .doOnNext(userRegistrationDto -> log.info(OperationsMessage.REQUEST_RECEIVED.getMessage(), userRegistrationDto.toString()))
                 .flatMap(validationService::validateObject)
                 .map(userMapper::toUser)
                 .flatMap(userService::saveUser)
                 .flatMap(savedUser -> {
                     ApiResponseDto<Object> response = ApiResponseDto.builder()
-                            .status(201)
-                            .message("User created successfull")
+                            .status("201")
+                            .message(OperationsMessage.RESOURCE_CREATED.getMessage())
                             .data(savedUser).build();
                     return ServerResponse.status(201).contentType(MediaType.APPLICATION_JSON).bodyValue(response);
                 });
@@ -99,7 +101,7 @@ public class Handler {
                             )
                     ),
                     @ApiResponse(
-                            responseCode = "404",
+                            responseCode = "B_001",
                             description = "User with dni doesn't exists.",
                             content = @Content(
                                     schema = @Schema(implementation = ApiResponseDto.class)
@@ -119,11 +121,12 @@ public class Handler {
     public Mono<ServerResponse> listenGetUserEmailByDni(ServerRequest request) {
         String dniUser = request.pathVariable("dni");
         return userService.getUserEmailByDni(dniUser)
+                .doOnNext(dni -> log.info(OperationsMessage.REQUEST_RECEIVED.getMessage(), dni))
                 .switchIfEmpty(Mono.error(new CrediYaException(ErrorCode.USER_NOT_FOUND)))
                 .flatMap(userEmail -> {
                     ApiResponseDto<Object> response = ApiResponseDto.builder()
-                            .status(200)
-                            .message("User exists")
+                            .status("Success")
+                            .message(OperationsMessage.USER_EXISTS.getMessage())
                             .data(userEmail).build();
                     return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(response);
                 });
