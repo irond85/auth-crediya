@@ -3,11 +3,10 @@ package co.irond.crediya.api;
 import co.irond.crediya.api.dto.ApiResponseDto;
 import co.irond.crediya.api.dto.LoginRequestDto;
 import co.irond.crediya.api.dto.UserRegistrationDto;
+import co.irond.crediya.api.utils.LoginMapper;
 import co.irond.crediya.api.utils.UserMapper;
 import co.irond.crediya.api.utils.ValidationService;
 import co.irond.crediya.constants.OperationsMessage;
-import co.irond.crediya.model.dto.LoginDto;
-import co.irond.crediya.model.dto.TokenDto;
 import co.irond.crediya.model.exceptions.CrediYaException;
 import co.irond.crediya.model.exceptions.ErrorCode;
 import co.irond.crediya.model.user.User;
@@ -40,6 +39,7 @@ public class Handler {
     private final ValidationService validationService;
     private final UserMapper userMapper;
     private final LoginUseCase loginUseCase;
+    private final LoginMapper loginMapper;
 
     @Operation(
             operationId = "getAllUsers",
@@ -141,13 +141,50 @@ public class Handler {
                 });
     }
 
+    @Operation(
+            operationId = "loginUser",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "User logged successful",
+                            content = @Content(
+                                    schema = @Schema(implementation = ApiResponseDto.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "No token was found in the request.",
+                            content = @Content(
+                                    schema = @Schema(implementation = ApiResponseDto.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Credentials don't match.",
+                            content = @Content(
+                                    schema = @Schema(implementation = ApiResponseDto.class)
+                            )
+                    ),
+            },
+            requestBody = @RequestBody(
+                    content = @Content(
+                            schema = @Schema(implementation = LoginRequestDto.class)
+                    )
+            )
+    )
     public Mono<ServerResponse> listenLoginUser(ServerRequest request) {
         return request.bodyToMono(LoginRequestDto.class)
                 .doOnNext(loginDto -> log.info(OperationsMessage.REQUEST_RECEIVED.getMessage(), loginDto.toString()))
                 .flatMap(validationService::validateObject)
-                .flatMap(dto -> ServerResponse.ok()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(loginUseCase.login(new LoginDto(dto.getEmail(), dto.getPassword())), TokenDto.class));
+                .map(loginMapper::toLoginDto)
+                .flatMap(loginUseCase::login)
+                .flatMap(token -> {
+                    ApiResponseDto<Object> response = ApiResponseDto.builder()
+                            .status("200")
+                            .message(OperationsMessage.LOGIN_OK.getMessage())
+                            .data(token).build();
+                    return ServerResponse.status(201).contentType(MediaType.APPLICATION_JSON).bodyValue(response);
+                });
     }
 
 }
