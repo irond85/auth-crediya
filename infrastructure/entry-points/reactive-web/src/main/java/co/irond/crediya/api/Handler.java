@@ -183,7 +183,7 @@ public class Handler {
                             .status("200")
                             .message(OperationsMessage.LOGIN_OK.getMessage())
                             .data(token).build();
-                    return ServerResponse.status(201).contentType(MediaType.APPLICATION_JSON).bodyValue(response);
+                    return ServerResponse.status(200).contentType(MediaType.APPLICATION_JSON).bodyValue(response);
                 });
     }
 
