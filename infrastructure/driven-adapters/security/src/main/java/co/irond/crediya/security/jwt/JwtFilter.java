@@ -19,7 +19,7 @@ public class JwtFilter implements WebFilter {
         ServerHttpRequest serverRequest = exchange.getRequest();
         String path = serverRequest.getPath().value();
 
-        if (path.contains("/login") || path.contains("swagger-ui/"))
+        if (path.contains("/login") || path.contains("/swagger-ui") || path.contains("/v3/api-docs"))
             return chain.filter(exchange);
 
         String auth = serverRequest.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
