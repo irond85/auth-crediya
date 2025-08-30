@@ -1,7 +1,7 @@
 package co.irond.crediya.api.exception;
 
-import co.irond.crediya.model.user.exceptions.CrediYaException;
-import co.irond.crediya.model.user.exceptions.ErrorCode;
+import co.irond.crediya.model.exceptions.CrediYaException;
+import co.irond.crediya.model.exceptions.ErrorCode;
 import jakarta.validation.ValidationException;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.reactive.error.DefaultErrorAttributes;

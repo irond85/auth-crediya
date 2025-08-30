@@ -1,4 +1,4 @@
-package co.irond.crediya.model.user.exceptions;
+package co.irond.crediya.model.exceptions;
 
 import lombok.Getter;
 
