@@ -85,7 +85,8 @@ public class Handler {
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('ADVISOR')")
     public Mono<ServerResponse> listenSaveUser(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(UserRegistrationDto.class)
-                .doOnNext(userRegistrationDto -> log.info(OperationsMessage.REQUEST_RECEIVED.getMessage(), userRegistrationDto.toString()))
+                .doOnNext(userRegistrationDto -> log.info(OperationsMessage.REQUEST_RECEIVED.getMessage(),
+                        "SaveUser. " + userRegistrationDto.toString()))
                 .flatMap(validationService::validateObject)
                 .map(userMapper::toUser)
                 .flatMap(userService::saveUser)
@@ -130,7 +131,8 @@ public class Handler {
     public Mono<ServerResponse> listenGetUserEmailByDni(ServerRequest request) {
         String dniUser = request.pathVariable("dni");
         return userService.getUserEmailByDni(dniUser)
-                .doOnNext(dni -> log.info(OperationsMessage.REQUEST_RECEIVED.getMessage(), dni))
+                .doOnNext(dni -> log.info(OperationsMessage.REQUEST_RECEIVED.getMessage(), "getEmailByDni. "
+                        + dni))
                 .switchIfEmpty(Mono.error(new CrediYaException(ErrorCode.USER_NOT_FOUND)))
                 .flatMap(userEmail -> {
                     ApiResponseDto<Object> response = ApiResponseDto.builder()
@@ -174,7 +176,8 @@ public class Handler {
     )
     public Mono<ServerResponse> listenLoginUser(ServerRequest request) {
         return request.bodyToMono(LoginRequestDto.class)
-                .doOnNext(loginDto -> log.info(OperationsMessage.REQUEST_RECEIVED.getMessage(), loginDto.toString()))
+                .doOnNext(loginDto -> log.info(OperationsMessage.REQUEST_RECEIVED.getMessage(), "LoginUser. "
+                        + loginDto.toString()))
                 .flatMap(validationService::validateObject)
                 .map(loginMapper::toLoginDto)
                 .flatMap(loginUseCase::login)
