@@ -29,5 +29,9 @@ public class UserRegistrationDto {
     private BigDecimal baseSalary;
     @NotEmpty(message = "dni can't be empty")
     private String dni;
+    @NotNull(message = "role can't be empty")
+    private Long role;
+    @NotEmpty(message = "password can't be empty")
+    private String password;
 
 }

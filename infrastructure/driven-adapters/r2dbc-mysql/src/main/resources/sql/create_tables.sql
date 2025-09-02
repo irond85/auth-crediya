@@ -1,11 +1,27 @@
-CREATE TABLE `auth`.`users` (
-  `user_id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(50) NOT NULL,
-  `last_name` VARCHAR(50) NOT NULL,
-  `birthday` DATETIME NULL,
-  `address` VARCHAR(100) NULL,
-  `phone` VARCHAR(20) NULL,
-  `email` VARCHAR(45) NOT NULL,
-  `base_salary` DECIMAL NOT NULL,
+-- auth.roles definition
+CREATE TABLE `roles` (
+  `id_rol` int NOT NULL,
+  `name` varchar(45) NOT NULL,
+  `description` varchar(50) NOT NULL,
+  PRIMARY KEY (`id_rol`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- auth.users definition
+CREATE TABLE `users` (
+  `user_id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `last_name` varchar(50) NOT NULL,
+  `birthday` datetime DEFAULT NULL,
+  `address` varchar(100) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(45) NOT NULL,
+  `base_salary` decimal(10,0) NOT NULL,
+  `dni` varchar(45) NOT NULL,
+  `rol_id` int NOT NULL,
+  `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   PRIMARY KEY (`user_id`),
-  UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE);
+  UNIQUE KEY `email_UNIQUE` (`email`),
+  UNIQUE KEY `dni_UNIQUE` (`dni`),
+  KEY `rol_user_idx` (`rol_id`),
+  CONSTRAINT `rol_user` FOREIGN KEY (`rol_id`) REFERENCES `roles` (`id_rol`)
+) ENGINE=InnoDB AUTO_INCREMENT=72 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

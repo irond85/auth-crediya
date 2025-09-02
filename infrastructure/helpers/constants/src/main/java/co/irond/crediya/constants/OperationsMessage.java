@@ -4,11 +4,12 @@ import lombok.Getter;
 
 @Getter
 public enum OperationsMessage {
-    REQUEST_RECEIVED("Request received for entity {}"),
+    REQUEST_RECEIVED("Request received for {}"),
     OPERATION_ERROR("Error failed service transactional: {}"),
     SAVE_OK("User with email {} saved successfully."),
     RESOURCE_CREATED("Resource created successful."),
-    USER_EXISTS("User was finded");
+    USER_EXISTS("User was finded"),
+    LOGIN_OK("User logged successful");
 
 
     private final String message;

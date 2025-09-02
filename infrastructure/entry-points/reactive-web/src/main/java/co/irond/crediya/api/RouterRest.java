@@ -23,12 +23,14 @@ public class RouterRest {
     @RouterOperations({
             @RouterOperation(path = "/api/v1/usuarios", method = RequestMethod.GET, beanClass = Handler.class, beanMethod = "listenGETUseCase"),
             @RouterOperation(path = "/api/v1/usuarios", method = RequestMethod.POST, beanClass = Handler.class, beanMethod = "listenSaveUser"),
-            @RouterOperation(path = "/api/v1/usuarios/dni/{dni}", method = RequestMethod.GET, beanClass = Handler.class, beanMethod = "listenGetUserEmailByDni")
+            @RouterOperation(path = "/api/v1/usuarios/dni/{dni}", method = RequestMethod.GET, beanClass = Handler.class, beanMethod = "listenGetUserEmailByDni"),
+            @RouterOperation(path = "/api/v1/login", method = RequestMethod.POST, beanClass = Handler.class, beanMethod = "listenLoginUser")
 
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
-        return route(GET(authPath.getUsuarios()), handler::listenGETUseCase)
-                .andRoute(POST(authPath.getUsuarios()), handler::listenSaveUser)
-                .andRoute(GET(authPath.getUsuarioByDni()), handler::listenGetUserEmailByDni);
+        return route(GET(authPath.getV1() + authPath.getUsuarios()), handler::listenGETUseCase)
+                .andRoute(POST(authPath.getV1() + authPath.getUsuarios()), handler::listenSaveUser)
+                .andRoute(GET(authPath.getV1() + authPath.getUsuarioByDni()), handler::listenGetUserEmailByDni)
+                .andRoute(POST(authPath.getV1() + authPath.getLogin()), handler::listenLoginUser);
     }
 }

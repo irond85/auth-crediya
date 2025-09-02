@@ -10,4 +10,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class AuthPath {
     private String usuarios;
     private String usuarioByDni;
+    private String login;
+    private String v1;
 }
