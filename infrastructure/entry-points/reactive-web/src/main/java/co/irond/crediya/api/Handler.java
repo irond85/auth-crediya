@@ -92,7 +92,7 @@ public class Handler {
                 .flatMap(userService::saveUser)
                 .flatMap(savedUser -> {
                     ApiResponseDto<Object> response = ApiResponseDto.builder()
-                            .status("201")
+                            .status(OperationsMessage.SUCCESS.getMessage())
                             .message(OperationsMessage.RESOURCE_CREATED.getMessage())
                             .data(savedUser).build();
                     return ServerResponse.status(201).contentType(MediaType.APPLICATION_JSON).bodyValue(response);
@@ -100,11 +100,11 @@ public class Handler {
     }
 
     @Operation(
-            operationId = "getUserEmailByDni",
+            operationId = "getUserByDni",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "get user email from user dni successfully.",
+                            description = "get user from user dni successfully.",
                             content = @Content(
                                     schema = @Schema(implementation = ApiResponseDto.class)
                             )
@@ -130,15 +130,15 @@ public class Handler {
     @PreAuthorize("hasAuthority('CUSTOMER')")
     public Mono<ServerResponse> listenGetUserEmailByDni(ServerRequest request) {
         String dniUser = request.pathVariable("dni");
-        return userService.getUserEmailByDni(dniUser)
-                .doOnNext(dni -> log.info(OperationsMessage.REQUEST_RECEIVED.getMessage(), "getEmailByDni. "
+        return userService.getUserByDni(dniUser)
+                .doOnNext(dni -> log.info(OperationsMessage.REQUEST_RECEIVED.getMessage(), "getUserByDni. "
                         + dni))
                 .switchIfEmpty(Mono.error(new CrediYaException(ErrorCode.USER_NOT_FOUND)))
-                .flatMap(userEmail -> {
+                .flatMap(user -> {
                     ApiResponseDto<Object> response = ApiResponseDto.builder()
-                            .status("Success")
+                            .status(OperationsMessage.SUCCESS.getMessage())
                             .message(OperationsMessage.USER_EXISTS.getMessage())
-                            .data(userEmail).build();
+                            .data(user).build();
                     return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(response);
                 });
     }
@@ -183,10 +183,54 @@ public class Handler {
                 .flatMap(loginUseCase::login)
                 .flatMap(token -> {
                     ApiResponseDto<Object> response = ApiResponseDto.builder()
-                            .status("200")
+                            .status(OperationsMessage.SUCCESS.getMessage())
                             .message(OperationsMessage.LOGIN_OK.getMessage())
                             .data(token).build();
                     return ServerResponse.status(200).contentType(MediaType.APPLICATION_JSON).bodyValue(response);
+                });
+    }
+
+    @Operation(
+            operationId = "getUserByDni",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "get user from user email successfully.",
+                            content = @Content(
+                                    schema = @Schema(implementation = ApiResponseDto.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "B_001",
+                            description = "User with email doesn't exists.",
+                            content = @Content(
+                                    schema = @Schema(implementation = ApiResponseDto.class)
+                            )
+                    )
+            },
+            parameters = {
+                    @Parameter(
+                            in = ParameterIn.PATH,
+                            name = "email",
+                            required = true,
+                            description = "The unique Email of the user.",
+                            example = "1"
+                    )
+            }
+    )
+
+    public Mono<ServerResponse> listenGetUserByEmail(ServerRequest request) {
+        String emailUser = request.pathVariable("email");
+        return userService.getUserByEmail(emailUser)
+                .doOnNext(user -> log.info(OperationsMessage.REQUEST_RECEIVED.getMessage(), "getUserByEmail. "
+                        + user.toString()))
+                .switchIfEmpty(Mono.error(new CrediYaException(ErrorCode.USER_NOT_FOUND)))
+                .flatMap(user -> {
+                    ApiResponseDto<Object> response = ApiResponseDto.builder()
+                            .status(OperationsMessage.SUCCESS.getMessage())
+                            .message(OperationsMessage.USER_EXISTS.getMessage())
+                            .data(user).build();
+                    return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(response);
                 });
     }
 
