@@ -1,5 +1,7 @@
 package co.irond.crediya.api;
 
+import co.irond.crediya.api.config.AuthPath;
+import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.RouterOperation;
 import org.springdoc.core.annotations.RouterOperations;
 import org.springframework.context.annotation.Bean;
@@ -13,17 +15,24 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
+@RequiredArgsConstructor
 public class RouterRest {
+    private final AuthPath authPath;
+
     @Bean
     @RouterOperations({
             @RouterOperation(path = "/api/v1/usuarios", method = RequestMethod.GET, beanClass = Handler.class, beanMethod = "listenGETUseCase"),
             @RouterOperation(path = "/api/v1/usuarios", method = RequestMethod.POST, beanClass = Handler.class, beanMethod = "listenSaveUser"),
-            @RouterOperation(path = "/api/v1/usuarios/dni/{dni}", method = RequestMethod.GET, beanClass = Handler.class, beanMethod = "listenGetUserEmailByDni")
+            @RouterOperation(path = "/api/v1/usuarios/dni/{dni}", method = RequestMethod.GET, beanClass = Handler.class, beanMethod = "listenGetUserEmailByDni"),
+            @RouterOperation(path = "/api/v1/login", method = RequestMethod.POST, beanClass = Handler.class, beanMethod = "listenLoginUser"),
+            @RouterOperation(path = "/api/v1/usuarios/email/{email}", method = RequestMethod.GET, beanClass = Handler.class, beanMethod = "listenGetUserByEmail")
 
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
-        return route(GET("/api/v1/usuarios"), handler::listenGETUseCase)
-                .andRoute(POST("/api/v1/usuarios"), handler::listenSaveUser)
-                .andRoute(GET("/api/v1/usuarios/dni/{dni}"), handler::listenGetUserEmailByDni);
+        return route(GET(authPath.getV1() + authPath.getUsuarios()), handler::listenGETUseCase)
+                .andRoute(POST(authPath.getV1() + authPath.getUsuarios()), handler::listenSaveUser)
+                .andRoute(GET(authPath.getV1() + authPath.getUsuarioByDni()), handler::listenGetUserEmailByDni)
+                .andRoute(POST(authPath.getV1() + authPath.getLogin()), handler::listenLoginUser)
+                .andRoute(GET(authPath.getV1() + authPath.getUsuarioByEmail()), handler::listenGetUserByEmail);
     }
 }

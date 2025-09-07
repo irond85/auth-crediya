@@ -1,7 +1,10 @@
 package co.irond.crediya.r2dbc;
 
+import co.irond.crediya.model.dto.LoginDto;
+import co.irond.crediya.model.dto.TokenDto;
 import co.irond.crediya.model.user.User;
 import co.irond.crediya.r2dbc.entity.UserEntity;
+import co.irond.crediya.security.jwt.JwtProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,6 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.reactivecommons.utils.ObjectMapper;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -30,8 +35,16 @@ class UserReactiveRepositoryAdapterTest {
     @Mock
     ObjectMapper mapper;
 
+    @Mock
+    PasswordEncoder passwordEncoder;
+
+    @Mock
+    JwtProvider jwtProvider;
+
     private User user;
     private UserEntity userEntity;
+    private LoginDto loginDto;
+    private TokenDto tokenDto;
 
     @BeforeEach
     void initMocks() {
@@ -41,6 +54,7 @@ class UserReactiveRepositoryAdapterTest {
         userEntity.setEmail("correo@correo.com");
         userEntity.setAddress("My Address 123");
         userEntity.setBaseSalary(BigDecimal.TEN);
+        userEntity.setPassword("myPwd123");
 
         user = new User();
         user.setName("Sergio");
@@ -48,7 +62,10 @@ class UserReactiveRepositoryAdapterTest {
         user.setEmail("correo@correo.com");
         user.setAddress("My Address 123");
         user.setBaseSalary(BigDecimal.TEN);
+        user.setPassword("myPwd123");
 
+        loginDto = new LoginDto("juan.ceballos@correo.com", "123");
+        tokenDto = new TokenDto("eyJh123");
     }
 
     @Test
@@ -99,6 +116,19 @@ class UserReactiveRepositoryAdapterTest {
 
         StepVerifier.create(result)
                 .expectNextMatches(value -> value.equals(user))
+                .verifyComplete();
+    }
+
+    @Test
+    void login() {
+        when(repository.findByEmail(anyString())).thenReturn(Mono.just(userEntity));
+        when(passwordEncoder.matches(loginDto.password(), userEntity.getPassword())).thenReturn(true);
+        when(jwtProvider.generateToken(any(UserDetails.class))).thenReturn("eyJh123");
+
+        Mono<TokenDto> result = repositoryAdapter.login(loginDto);
+
+        StepVerifier.create(result)
+                .expectNextMatches(value -> value.equals(tokenDto))
                 .verifyComplete();
     }
 }

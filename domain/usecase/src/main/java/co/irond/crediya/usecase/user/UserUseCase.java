@@ -1,8 +1,8 @@
 package co.irond.crediya.usecase.user;
 
+import co.irond.crediya.model.exceptions.CrediYaException;
+import co.irond.crediya.model.exceptions.ErrorCode;
 import co.irond.crediya.model.user.User;
-import co.irond.crediya.model.user.exceptions.CrediYaException;
-import co.irond.crediya.model.user.exceptions.ErrorCode;
 import co.irond.crediya.model.user.gateways.UserRepository;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
@@ -22,30 +22,31 @@ public class UserUseCase {
         }
 
         Mono<Boolean> emailExists = userRepository.existsByEmail(user.getEmail());
-        Mono<Boolean> dniExists = userRepository.findEmailByDni(user.getDni())
+        Mono<Boolean> dniExists = userRepository.findUserByDni(user.getDni())
                 .hasElement();
 
         return Mono.zip(emailExists, dniExists)
-                .flatMap(result -> {
-                    boolean emailAlreadyExists = result.getT1();
-                    boolean dniAlreadyExists = result.getT2();
-
-                    if (emailAlreadyExists) {
-                        return Mono.error(new CrediYaException(ErrorCode.EMAIL_ALREADY_EXISTS));
-                    }
-                    if (dniAlreadyExists) {
-                        return Mono.error(new CrediYaException(ErrorCode.DNI_ALREADY_EXISTS));
-                    }
-                    return userRepository.saveUser(user);
-                });
+                .filter(tuple -> !tuple.getT1())
+                .switchIfEmpty(Mono.error(new CrediYaException(ErrorCode.EMAIL_ALREADY_EXISTS)))
+                .filter(tuple -> !tuple.getT2())
+                .switchIfEmpty(Mono.error(new CrediYaException(ErrorCode.DNI_ALREADY_EXISTS)))
+                .flatMap(result ->
+                        userRepository.saveUser(user)
+                );
     }
 
     public Flux<User> getAllUsers() {
         return userRepository.findAllUsers();
     }
 
-    public Mono<String> getUserEmailById(String dni) {
-        return userRepository.findEmailByDni(dni);
+    public Mono<User> getUserById(String dni) {
+        return userRepository.findUserByDni(dni);
     }
 
+    public Mono<User> getUserByEmail(String email) {
+        return userRepository.findUserByEmail(email).flatMap(user -> {
+            user.setPassword("");
+            return Mono.just(user);
+        });
+    }
 }

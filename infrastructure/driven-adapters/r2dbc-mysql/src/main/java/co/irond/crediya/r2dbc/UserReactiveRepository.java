@@ -1,5 +1,6 @@
 package co.irond.crediya.r2dbc;
 
+import co.irond.crediya.model.user.User;
 import co.irond.crediya.r2dbc.entity.UserEntity;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
@@ -10,6 +11,11 @@ public interface UserReactiveRepository extends ReactiveCrudRepository<UserEntit
 
     Mono<Boolean> existsByEmail(String email);
 
-    @Query("SELECT email FROM users WHERE dni = :dni")
-    Mono<String> findEmailByDni(String dni);
+    @Query("SELECT * FROM users WHERE dni = :dni")
+    Mono<User> findUserByDni(String dni);
+
+    Mono<UserEntity> findByEmail(String email);
+
+    Mono<User> findUserByEmail(String email);
+
 }
