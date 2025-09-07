@@ -123,4 +123,17 @@ class UserUseCaseTest {
 
         verify(userRepository, times(1)).findUserByDni(anyString());
     }
+
+    @Test
+    void getUserByEmail() {
+        when(userRepository.findUserByEmail(anyString())).thenReturn(Mono.just(user));
+
+        Mono<User> response = userUseCase.getUserByEmail(email);
+
+        StepVerifier.create(response)
+                .expectNextMatches(value -> value.equals(user))
+                .verifyComplete();
+
+        verify(userRepository, times(1)).findUserByEmail(anyString());
+    }
 }
