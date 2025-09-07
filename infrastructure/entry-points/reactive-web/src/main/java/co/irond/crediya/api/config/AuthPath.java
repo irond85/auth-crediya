@@ -12,4 +12,5 @@ public class AuthPath {
     private String usuarioByDni;
     private String login;
     private String v1;
+    private String usuarioByEmail;
 }

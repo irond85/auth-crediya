@@ -32,6 +32,7 @@ class UserServiceTest {
     UserUseCase userUseCase;
 
     private User user;
+    private final String email = "myEmail@mail.com";
 
     @BeforeEach
     void initMocks() {
@@ -39,7 +40,7 @@ class UserServiceTest {
         user.setName("Sergio");
         user.setLastName("Agudelo");
         user.setBirthday(LocalDateTime.of(2025, 8, 25, 20, 0));
-        user.setEmail("myEmail@mail.com");
+        user.setEmail(email);
         user.setAddress("My Address 123");
         user.setBaseSalary(BigDecimal.TEN);
     }
@@ -102,5 +103,31 @@ class UserServiceTest {
                 .verifyComplete();
 
         verify(userUseCase).getAllUsers();
+    }
+
+    @Test
+    void findUserByUser() {
+        when(userUseCase.getUserById(anyString())).thenReturn(Mono.just(user));
+
+        Mono<User> result = userService.getUserByDni(email);
+
+        StepVerifier.create(result)
+                .expectNext(user)
+                .verifyComplete();
+
+        verify(userUseCase).getUserById(anyString());
+    }
+
+    @Test
+    void findUserByEmail() {
+        when(userUseCase.getUserByEmail(anyString())).thenReturn(Mono.just(user));
+
+        Mono<User> result = userService.getUserByEmail(email);
+
+        StepVerifier.create(result)
+                .expectNext(user)
+                .verifyComplete();
+
+        verify(userUseCase).getUserByEmail(anyString());
     }
 }

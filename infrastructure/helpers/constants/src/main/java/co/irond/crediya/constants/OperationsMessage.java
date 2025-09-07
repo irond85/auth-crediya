@@ -9,7 +9,8 @@ public enum OperationsMessage {
     SAVE_OK("User with email {} saved successfully."),
     RESOURCE_CREATED("Resource created successful."),
     USER_EXISTS("User was finded"),
-    LOGIN_OK("User logged successful");
+    LOGIN_OK("User logged successful"),
+    SUCCESS("Success");
 
 
     private final String message;

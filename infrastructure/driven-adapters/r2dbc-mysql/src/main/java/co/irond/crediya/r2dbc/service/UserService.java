@@ -32,8 +32,11 @@ public class UserService {
         return userUseCase.getAllUsers();
     }
 
-    public Mono<String> getUserEmailByDni(String dni) {
-        return userUseCase.getUserEmailById(dni);
+    public Mono<User> getUserByDni(String dni) {
+        return userUseCase.getUserById(dni);
     }
 
+    public Mono<User> getUserByEmail(String email) {
+        return userUseCase.getUserByEmail(email);
+    }
 }

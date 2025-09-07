@@ -53,8 +53,8 @@ public class UserReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
-    public Mono<String> findEmailByDni(String dni) {
-        return repository.findEmailByDni(dni);
+    public Mono<User> findUserByDni(String dni) {
+        return repository.findUserByDni(dni);
     }
 
     @Override
@@ -65,5 +65,10 @@ public class UserReactiveRepositoryAdapter extends ReactiveAdapterOperations<
                 .switchIfEmpty(Mono.error(new CrediYaException(ErrorCode.BAD_CREDENTIALS)))
                 .map(userEntity -> new TokenDto(jwtProvider.generateToken(userEntity)))
                 .doOnError(error -> log.error(OperationsMessage.OPERATION_ERROR.getMessage(), error.toString()));
+    }
+
+    @Override
+    public Mono<User> findUserByEmail(String email) {
+        return repository.findUserByEmail(email);
     }
 }
