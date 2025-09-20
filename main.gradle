@@ -93,6 +93,18 @@ tasks.register('jacocoMergedReport', JacocoReport) {
     additionalSourceDirs.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
     sourceDirectories.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
     classDirectories.setFrom files(subprojects.sourceSets.main.output)
+    classDirectories.setFrom(files(classDirectories.files.collect {
+        fileTree(dir: it, exclude: [
+                '**/api/',
+                '**/security/',
+                '**/consumer/',
+                '**/constants/',
+                '**/r2dbc/entity/',
+                '**/r2dbc/helper/',
+                '**/UserReactiveRepositoryAdapter.class',
+                '**/MainApplication.class'
+        ])
+    }))
     executionData.setFrom project.fileTree(dir: '.', include: '**/build/jacoco/test.exec')
     reports {
         xml.setRequired true
